@@ -1,0 +1,80 @@
+openapi: 3.0.0
+info:
+  title: OpenBeta GraphQL API
+  description: GraphQL API provided by OpenBeta for accessing data related to climbing areas and other outdoor activities.
+  version: 1.0.0
+servers:
+  - url: https://api.openbeta.io
+paths:
+  /graphql:
+    post:
+      operationId: executeAreaQuery
+      summary: Execute a GraphQL query to fetch details about climbing areas based on name matching.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - query
+                - variables
+              properties:
+                query:
+                  type: string
+                  description: GraphQL query to fetch area details. This field is auto-filled by the API client and should not be
+                    modified.
+                  example: "query AreaByName($areaName: String!) { areas(filter: {area_name: {match: $areaName}}) { area_name children {
+                    area_name metadata { lat lng } } } }"
+                variables:
+                  type: object
+                  required:
+                    - areaName
+                  properties:
+                    areaName:
+                      type: string
+                      description: Name of the climbing area to search for.
+                      example: Stone Fort
+      responses:
+        "200":
+          description: Successful query execution returning climbing area data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      areas:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            area_name:
+                              type: string
+                            children:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  area_name:
+                                    type: string
+                                  metadata:
+                                    type: object
+                                    properties:
+                                      lat:
+                                        type: number
+                                        format: double
+                                      lng:
+                                        type: number
+                                        format: double
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                        extensions:
+                          type: object
